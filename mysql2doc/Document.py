@@ -1,17 +1,21 @@
+from mysql2doc.MySql import MySql
+
 __author__ = 'yanglikun'
 from docx import Document
-from operator import attrgetter
-from mysql2doc import DB
 
 
 class Word:
+    def __init__(self, document):
+        super().__init__()
+        self.document = document
+
     def __bold(ele, text):
         ele.paragraphs[0].add_run(text).bold = True
 
-    def __addTable(document, table, seqNO):
-        document.add_heading("{} {}".format(seqNO, table.name), level=1)
-        document.add_paragraph(table.comment)
-        tableGrid = document.add_table(rows=1, cols=4, style='TableGrid')
+    def addTable(self, table, seqNO):
+        self.document.add_heading("{} {}".format(seqNO, table.name), level=1)
+        self.document.add_paragraph(table.comment)
+        tableGrid = self.document.add_table(rows=1, cols=4, style='TableGrid')
         titleRow = tableGrid.rows[0].cells
         Word.__bold(titleRow[0], '字段')
         titleRow[1].text = '类型'
@@ -26,9 +30,9 @@ class Word:
                 row[3].text = '是'
             else:
                 row[3].text = '否'
-        document.add_paragraph()
-        document.add_paragraph('索引列', style='ListBullet')
-        idxTableGrid = document.add_table(rows=1, cols=5, style='TableGrid')
+        self.document.add_paragraph()
+        self.document.add_paragraph('索引列', style='ListBullet')
+        idxTableGrid = self.document.add_table(rows=1, cols=5, style='TableGrid')
         idxTitleRow = idxTableGrid.rows[0].cells
         Word.__bold(idxTitleRow[0], '唯一索引')
         idxTitleRow[1].text = '索引名称'
@@ -47,11 +51,17 @@ class Word:
             idxRow[4].text = index.comment
         pass
 
-    def createFile(fileName='table'):
+    def createFile(fileName='database'):
         document = Document()
         document.add_heading('数据库表结构', 0)
         document.add_paragraph('数据库表结构')
-        for idx, table in enumerate(DB.generateTableData()):
-            Word.__addTable(document, table, idx)
+        mysql=None
+        try:
+            mysql = MySql()
+            word = Word(document)
+            for idx, table in enumerate(mysql.generateTableData()):
+                word.addTable(table, idx)
+        finally:
+            MySql.close(mysql)
         document.add_page_break()
         document.save(fileName + '.docx')

@@ -2,7 +2,7 @@ __author__ = 'yanglikun'
 from collections import namedtuple
 import os
 
-DBConfig = namedtuple("dbConfig", ["userName", "password", "host", "databaseName", "charset"])
+DBConfig = namedtuple("dbConfig", ["userName", "password", "host","port","databaseName", "charset"])
 
 # 加载文件
 configMap = {}
@@ -15,6 +15,7 @@ with open(os.path.dirname(os.path.abspath(__file__)) + '/../config.properties') 
 dbConfig = DBConfig(configMap['db.userName'],
                     configMap['db.password'],
                     configMap['db.host'],
+                    configMap['db.port'],
                     configMap['db.databaseName'],
                     configMap['db.charset'])
 
